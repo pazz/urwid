@@ -46,7 +46,7 @@ class TreeWidget(urwid.WidgetWrap):
     def __init__(self, node):
         self._node = node
         self._innerwidget = None
-        self.is_leaf = not hasattr(node, 'get_first_child')
+        self.is_leaf = node._is_leaf
         self.expanded = True
         widget = self.get_indented_widget()
         self.__super.__init__(widget)
@@ -201,28 +201,29 @@ class TreeNode(object):
     *  widget: The widget used to render the object
     """
 
-    def __init__(self, value, parent=None, key=None, depth=None):
+    def __init__(self, value, parent=None, key=None, depth=None, force_leaf=False):
         self._key = key
         self._parent = parent
         self._value = value
         self._depth = depth
         self._widget = None
+        self._is_leaf = force_leaf
 
         self._child_keys = None
         self._children = {}
 
     def get_child_keys(self, reload=False):
         """Return a possibly ordered list of child keys"""
-        if self._child_keys is None or reload is True:
-            self._child_keys = self.load_child_keys()
+        if self._child_keys is None or reload is True and not self._is_leaf:
+            keys = self.load_child_keys()
+            self._child_keys = keys
+            if keys is None:
+                self._is_leaf = True
         return self._child_keys
 
     def load_child_keys(self):
-        """Provide ParentNode with an ordered list of child keys (virtual
-        function)"""
-        # overwrite this to add children
-        return []
-        #raise TreeWidgetError("virtual function.  Implement in subclass")
+        """Provide ParentNode with an ordered list of child keys"""
+        return None  # overwrite this to add children
 
     def get_child_widget(self, key):
         """Return the widget for a given key.  Create if necessary."""
