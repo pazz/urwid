@@ -154,7 +154,7 @@ class ErrorNode(urwid.TreeNode):
         return ErrorWidget(self)
 
 
-class DirectoryNode(urwid.ParentNode):
+class DirectoryNode(urwid.TreeNode):
     """Metadata storage for directories"""
 
     def __init__(self, path, parent=None):
@@ -164,7 +164,7 @@ class DirectoryNode(urwid.ParentNode):
         else:
             depth = path.count(dir_sep())
             key = os.path.basename(path)
-        urwid.ParentNode.__init__(self, path, key=key, parent=parent,
+        urwid.TreeNode.__init__(self, path, key=key, parent=parent,
                                   depth=depth)
 
     def load_parent(self):
