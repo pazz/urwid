@@ -200,86 +200,13 @@ class TreeNode(object):
     *  parent: a TreeNode which contains a pointer back to this object
     *  widget: The widget used to render the object
     """
+
     def __init__(self, value, parent=None, key=None, depth=None):
         self._key = key
         self._parent = parent
         self._value = value
         self._depth = depth
         self._widget = None
-
-    def get_widget(self, reload=False):
-        """ Return the widget for this node."""
-        if self._widget is None or reload is True:
-            self._widget = self.load_widget()
-        return self._widget
-
-    def load_widget(self):
-        return TreeWidget(self)
-
-    def get_depth(self):
-        if self._depth is None and self._parent is None:
-            self._depth = 0
-        elif self._depth is None:
-            self._depth = self._parent.get_depth() + 1
-        return self._depth
-
-    def get_index(self):
-        if self.get_depth() == 0:
-            return None
-        else:
-            key = self.get_key()
-            parent = self.get_parent()
-            return parent.get_child_index(key)
-
-    def get_key(self):
-        return self._key
-
-    def set_key(self, key):
-        self._key = key
-
-    def change_key(self, key):
-        self.get_parent().change_child_key(self._key, key)
-
-    def get_parent(self):
-        if self._parent is None and self.get_depth() > 0:
-            self._parent = self.load_parent()
-        return self._parent
-
-    def load_parent(self):
-        """Provide TreeNode with a parent for the current node.  This function
-        is only required if the tree was instantiated from a child node
-        (virtual function)"""
-        raise TreeWidgetError("virtual function.  Implement in subclass")
-
-    def get_value(self):
-        return self._value
-
-    def is_root(self):
-        return self.get_depth() == 0
-
-    def next_sibling(self):
-        if self.get_depth() > 0:
-            return self.get_parent().next_child(self.get_key())
-        else:
-            return None
-
-    def prev_sibling(self):
-        if self.get_depth() > 0:
-            return self.get_parent().prev_child(self.get_key())
-        else:
-            return None
-
-    def get_root(self):
-        root = self
-        while root.get_parent() is not None:
-            root = root.get_parent()
-        return root
-
-
-class ParentNode(TreeNode):
-    """Maintain sort order for TreeNodes."""
-    def __init__(self, value, parent=None, key=None, depth=None):
-        TreeNode.__init__(self, value, parent=parent, key=key, depth=depth)
 
         self._child_keys = None
         self._children = {}
@@ -293,7 +220,9 @@ class ParentNode(TreeNode):
     def load_child_keys(self):
         """Provide ParentNode with an ordered list of child keys (virtual
         function)"""
-        raise TreeWidgetError("virtual function.  Implement in subclass")
+        # overwrite this to add children
+        return []
+        #raise TreeWidgetError("virtual function.  Implement in subclass")
 
     def get_child_widget(self, key):
         """Return the widget for a given key.  Create if necessary."""
@@ -372,9 +301,77 @@ class ParentNode(TreeNode):
         child_keys = self.get_child_keys()
         return self.get_child_node(child_keys[-1])
 
+    def get_value(self):
+        return self._value
+
+    def get_widget(self, reload=False):
+        """ Return the widget for this node."""
+        if self._widget is None or reload is True:
+            self._widget = self.load_widget()
+        return self._widget
+
+    def load_widget(self):
+        return TreeWidget(self)
+
+    def get_depth(self):
+        if self._depth is None and self._parent is None:
+            self._depth = 0
+        elif self._depth is None:
+            self._depth = self._parent.get_depth() + 1
+        return self._depth
+
+    def get_index(self):
+        if self.get_depth() == 0:
+            return None
+        else:
+            key = self.get_key()
+            parent = self.get_parent()
+            return parent.get_child_index(key)
+
+    def get_key(self):
+        return self._key
+
+    def set_key(self, key):
+        self._key = key
+
+    def change_key(self, key):
+        self.get_parent().change_child_key(self._key, key)
+
+    def get_parent(self):
+        if self._parent is None and self.get_depth() > 0:
+            self._parent = self.load_parent()
+        return self._parent
+
+    def load_parent(self):
+        """Provide TreeNode with a parent for the current node.  This function
+        is only required if the tree was instantiated from a child node
+        (virtual function)"""
+        raise TreeWidgetError("virtual function.  Implement in subclass")
+
+    def is_root(self):
+        return self.get_depth() == 0
+
     def has_children(self):
         """Does this node have any children?"""
         return len(self.get_child_keys()) > 0
+
+    def next_sibling(self):
+        if self.get_depth() > 0:
+            return self.get_parent().next_child(self.get_key())
+        else:
+            return None
+
+    def prev_sibling(self):
+        if self.get_depth() > 0:
+            return self.get_parent().prev_child(self.get_key())
+        else:
+            return None
+
+    def get_root(self):
+        root = self
+        while root.get_parent() is not None:
+            root = root.get_parent()
+        return root
 
 
 class TreeWalker(urwid.ListWalker):

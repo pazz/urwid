@@ -66,7 +66,7 @@ from urwid.util import (calc_text_pos, calc_width, is_wide_char,
     calc_trim_text, TagMarkupException, decompose_tagmarkup, MetaSuper,
     int_scale, is_mouse_event)
 from urwid.treetools import (TreeWidgetError, TreeWidget, TreeNode,
-    ParentNode, TreeWalker, TreeListBox)
+                             TreeWalker, TreeListBox)
 from urwid.vterm import (TermModes, TermCharset, TermScroller, TermCanvas,
     Terminal)
 
